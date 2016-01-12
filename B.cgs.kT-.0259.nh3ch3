@@ -69,4 +69,4 @@
 0.06 8.29813e-12
 0.07 8.05803e-12
 0.08 8.39426e-12
-0.09 3.13262e-11
+#0.09 3.13262e-11 # This data point seems a bit spurious and knocks the fit out of whack
