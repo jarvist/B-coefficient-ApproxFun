@@ -4,13 +4,14 @@ using ApproxFun
 #f = sin(x^2)
 #g = cos(x)
 
-c=Chebyshev([0,0.09]) #Define Chebyshev domain in this range (to match data imported)
+c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
 
 #pts=points(c,100) #This is a built in function; Approxfun would then do eg. vals=cos(pts) to get the values
 #show(pts)
 
 # Standard two column data form
-df = readdlm("B.cgs.kT-.0259.nh3ch3")
+#df = readdlm("B.cgs.kT-.0259.nh3ch3")
+df=readdlm("jagged.dat")
 pts=df[:,1] # Points
 vals=df[:,2] #Values at these points
 
@@ -21,4 +22,4 @@ me=Fun(cfs,c) # me is now an ApproxFun representation of the tabulated data.
 
 using Plots
 plot(me)
-plot(df)
+plot(df[:,1],df[:,2])
