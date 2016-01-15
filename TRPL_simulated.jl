@@ -1,13 +1,9 @@
 using ApproxFun
 
-#x = Fun(identity,[0.,10.])
-#f = sin(x^2)
-#g = cos(x)
-
 c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
 
 #pts=points(c,100) #This is a built in function; Approxfun would then do eg. vals=cos(pts) to get the values
-#show(pts)
+#show(pts) # Density looks like a 'U' with greater sampling density near the extremes of the range
 
 # Standard two column data form
 df = readdlm("B.cgs.kT-.0259.nh3ch3")
@@ -26,21 +22,12 @@ function vandermonde(S,n,x::AbstractVector)
     V
 end
 
-#x=collect(0:0.001:1.)
-#S=Chebyshev([0.,1.])
-#V=vandermonde(S,20,x)
-#v=cos(cos(x))
-#f=Fun(V\v,S)
-
 # For ...(this)... case, make sure `length(pts) >> n`.
 n=13
 V=vandermonde(c,n,pts)
-me=Fun(V\vals,c)
-
-
-#cfs=ApproxFun.transform(c,vals)
 # Are you ready for the magic?
-#me=Fun(cfs,c) # me is now an ApproxFun representation of the tabulated data. 
+me=Fun(V\vals,c)
+# me is now an ApproxFun representation of the tabulated data. 
 # As a Chebyshev polynomial fit we can do all sorts of differentiation + integration.
 
 using Plots
