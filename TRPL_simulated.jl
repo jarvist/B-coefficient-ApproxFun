@@ -49,5 +49,24 @@ function graphB(af,df)
     xaxis!("Density")
 end
 
+#using Plots
+#graphB(B,df)
+
+### OK, solving the ODE
+#i=Fun([0.,20.])
+#i0=0.i
+#B0=B(0) # Constant value approx
+#I=n->[n(0.)-B0,n(20.), n' + B0*n^2 ]
+#n=newton(I,i0)
+
+using ODE
+function I(t, n)
+  [n[2]; - B(n[2]) * n[2]*n[2] ]
+end
+
+initial=[0., 0.8]
+T,xv=ode23(I,initial,[0.;10])
+xv=hcat(xv...).'
+
 using Plots
-graphB(B,df)
+plot(xv)
