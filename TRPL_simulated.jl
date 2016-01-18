@@ -27,27 +27,27 @@ function loadB(filename)
     n=13
     V=vandermonde(c,n,pts)
     # Are you ready for the magic?
-    me=Fun(V\vals,c)
+    af=Fun(V\vals,c) # Approximate Function (af)
     # me is now an ApproxFun representation of the tabulated data. 
     # As a Chebyshev polynomial fit we can do all sorts of differentiation + integration.
-    return me,df
+    return af,df
 end
 
-me,df=loadB("B.cgs.kT-.0259.nh3ch3")
+B,df=loadB("B.cgs.kT-.0259.nh3ch3")
 
-function graphB(me,df)
+function graphB(af,df)
     # Logscale version...
-    plot(me,label="Chebyshev B")
+    plot(af,label="Chebyshev B")
     plot!(df[:,1],df[:,2],label="Raw B")
     yaxis!("B coeff")
     xaxis!("Density",:log10)
 
     # Linear version...
-    plot(me,label="Chebyshev B")
+    plot(af,label="Chebyshev B")
     plot!(df[:,1],df[:,2],label="Raw B")
     yaxis!("B coeff")
     xaxis!("Density")
 end
 
 using Plots
-graphB(me,df)
+graphB(B,df)
