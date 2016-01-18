@@ -59,14 +59,16 @@ end
 #I=n->[n(0.)-B0,n(20.), n' + B0*n^2 ]
 #n=newton(I,i0)
 
+BScale=1e10 # scale from Pooya's internal units to SI
+
 using ODE
 function I(t, n)
-  [n[2]; - B(n[2]) * n[2]*n[2] ]
+  [n[2]; - BScale*B(n[2]) * n[2]*n[2] ]
 end
 
 initial=[0., 0.8]
-T,xv=ode23(I,initial,[0.;10])
+T,xv=ode23(I,initial,[0.;1e-6]) # Integrate from 0 to 1 microsecond
 xv=hcat(xv...).'
 
 using Plots
-plot(xv)
+plot(xv[:,1],xv[:,2]) # Probably a more elegant way of getting an XY plot!
