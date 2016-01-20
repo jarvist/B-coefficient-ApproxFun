@@ -35,6 +35,8 @@ function loadB(filename)
 end
 
 B,df=loadB("B.cgs.kT-.0259.nh3ch3")
+# Pooya's data runs from densities between 0 .. 0.08
+# Unit is in electrons / unit cell, so multiply by ~4.03e21 to get cm^-3
 
 function graphB(af,df)
     # Logscale version...
@@ -53,21 +55,30 @@ end
 using Plots
 graphB(B,df)
 
-BScale=sqrt(4.03e21) #(4.03e21)^0.5 #4.03e32 # scale from Pooya's internal units to SI
-
 #Herz values from DOI: 10.1021/acs.accounts.5b00411
 A=5e6
 Bconst=0.9e-10
 
 using ODE
 function I(t, n)
-#  [n[2]; -A*n[2] - B(n[2]/4.03e21) * n[2]*n[2] ]
-  [n[2]; -A*n[2] - Bconst * n[2]*n[2] ]
+  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B
+#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]
+#  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ]
 end
 
-initial=[0., 0.8*4.03e21]
-T,xv=ode23(I,initial,[0.;1e-6]) # Integrate from 0 to 1 microsecond
+initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
+T,xv=ode23(I,initial,[0.;2e-8]) # Integrate from 0 to ... seconds
 xv=hcat(xv...).'
 
 using Plots
-plot(xv[:,1],xv[:,2]) # Probably a more elegant way of getting an XY plot!
+plot(T,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
+yaxis!("Density n (cm^-3)")
+
+plot(T,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
+yaxis!("Integrated Emission (???)")
+
+intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
+intensity=hcat(intensity...).'
+# calculates intensity reusing the same functional toolkit
+plot(T,intensity[:,1])
+yaxis!("Emission Intensity")
