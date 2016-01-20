@@ -20,6 +20,7 @@ function loadB(filename)
     df=readdlm(filename)
     #df = readdlm("B.cgs.kT-.0259.nh3ch3")
     #df=readdlm("jagged.dat") # Only 8 points, very sawtoothy
+    
     pts=df[:,1] # Points
     vals=df[:,2] #Values at these points
 
@@ -49,24 +50,22 @@ function graphB(af,df)
     xaxis!("Density")
 end
 
-#using Plots
-#graphB(B,df)
+using Plots
+graphB(B,df)
 
-### OK, solving the ODE
-#i=Fun([0.,20.])
-#i0=0.i
-#B0=B(0) # Constant value approx
-#I=n->[n(0.)-B0,n(20.), n' + B0*n^2 ]
-#n=newton(I,i0)
+BScale=sqrt(4.03e21) #(4.03e21)^0.5 #4.03e32 # scale from Pooya's internal units to SI
 
-BScale=1e10 # scale from Pooya's internal units to SI
+#Herz values from DOI: 10.1021/acs.accounts.5b00411
+A=5e6
+Bconst=0.9e-10
 
 using ODE
 function I(t, n)
-  [n[2]; - BScale*B(n[2]) * n[2]*n[2] ]
+#  [n[2]; -A*n[2] - B(n[2]/4.03e21) * n[2]*n[2] ]
+  [n[2]; -A*n[2] - Bconst * n[2]*n[2] ]
 end
 
-initial=[0., 0.8]
+initial=[0., 0.8*4.03e21]
 T,xv=ode23(I,initial,[0.;1e-6]) # Integrate from 0 to 1 microsecond
 xv=hcat(xv...).'
 
