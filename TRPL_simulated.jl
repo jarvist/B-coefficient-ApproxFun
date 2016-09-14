@@ -37,49 +37,54 @@ B,df=loadB("B.cgs.kT-.0259.nh3ch3")
 # Pooya's data runs from densities between 0 .. 0.08
 # Unit is in electrons / unit cell, so multiply by ~4.03e21 to get cm^-3
 
+# Print out the fit vs. the raw data, so you can see the residual
 function graphB(af,df)
     # Logscale version...
     plot(af,label="Chebyshev B")
     plot!(df[:,1],df[:,2],label="Raw B")
     yaxis!("B coeff")
-    xaxis!("Density",:log10)
-    png("Bcoeff_log.png")
-
-    # Linear version...
-    plot(af,label="Chebyshev B")
-    plot!(df[:,1],df[:,2],label="Raw B")
-    yaxis!("B coeff")
     xaxis!("Density")
     png("Bcoeff_linear.png")
+    
+    xaxis!(:log10)
+    png("Bcoeff_log.png")
 end
 
 using Plots
 graphB(B,df)
 
+# OK; we have an ApproxFun function (B) fitted to the tabulated data
+
 #Herz values from DOI: 10.1021/acs.accounts.5b00411
 A=5e6
 Bconst=0.9e-10
-# B is our Approxfun fit; internally it's a polynomial, but you can differentiate etc.
+# B is our Approxfun fit; internally it's a polynomial, but you can differentiate etc. as if it were analytic
 
+# We are now going to build our Ordinary Differential Equation model for n(t)
 using ODE
-function I(t, n)
-  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
-#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
+function I(t, n) # Intensity as function of time and density
+#  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
+  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
 #  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
 end
 
+# Initial vector; density is first part
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
-T,xv=ode23(I,initial,[0.;2e-8]) # Integrate from 0 to ... seconds
+T,xv=ode23(I,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
 xv=hcat(xv...).'
 
 using Plots
 
 plot(T,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
 yaxis!("Density n (cm^-3)")
-png("density.png")
+xaxis!("Time (s)")
+png("density_linear.png")
+yaxis!(:log10)
+png("density_log.png")
 
 plot(T,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
 yaxis!("Integrated Emission (???)")
+xaxis!("Time (s)")
 png("integrated_emission.png")
 
 intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
@@ -87,5 +92,7 @@ intensity=hcat(intensity...).'
 # calculates intensity reusing the same functional toolkit
 plot(T,intensity[:,1])
 yaxis!("Emission Intensity")
+xaxis!("Time (s)")
 png("emission.png")
-
+yaxis!(:log10)
+png("emission_log.png")
