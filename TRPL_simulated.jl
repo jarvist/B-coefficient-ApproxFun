@@ -23,7 +23,8 @@ function loadB(filename)
     vals=df[:,2] #Values at these points
 
     # For ...(this)... case, make sure `length(pts) >> n`.
-    n=13
+    n=13 # This is a magic number, found to give a good fit to Pooya's data
+    println("Attempting Vandermonde / Chebyshev fit with: Range: ",c," Points in fit: ",n," Data points:",length(pts))
     V=vandermonde(c,n,pts)
     # Are you ready for the magic?
     af=Fun(V\vals,c) # Approximate Function (af)
@@ -40,8 +41,8 @@ B,df=loadB("B.cgs.kT-.0259.nh3ch3")
 # Print out the fit vs. the raw data, so you can see the residual
 function graphB(af,df)
     # Logscale version...
-    plot(af,label="Chebyshev B")
-    plot!(df[:,1],df[:,2],label="Raw B")
+    plot(af,label="Chebyshev (fit) B")
+    plot!(df[:,1],df[:,2],label="Tabulated (input) B")
     yaxis!("B coeff")
     xaxis!("Density")
     png("Bcoeff_linear.png")
@@ -89,7 +90,7 @@ png("integrated_emission.png")
 
 intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
 intensity=hcat(intensity...).'
-# calculates intensity reusing the same functional toolkit
+# calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
 plot(T,intensity[:,1])
 yaxis!("Emission Intensity")
 xaxis!("Time (s)")
