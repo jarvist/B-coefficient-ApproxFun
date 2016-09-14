@@ -44,12 +44,14 @@ function graphB(af,df)
     plot!(df[:,1],df[:,2],label="Raw B")
     yaxis!("B coeff")
     xaxis!("Density",:log10)
+    png("Bcoeff_log.png")
 
     # Linear version...
     plot(af,label="Chebyshev B")
     plot!(df[:,1],df[:,2],label="Raw B")
     yaxis!("B coeff")
     xaxis!("Density")
+    png("Bcoeff_linear.png")
 end
 
 using Plots
@@ -71,14 +73,19 @@ T,xv=ode23(I,initial,[0.;2e-8]) # Integrate from 0 to ... seconds
 xv=hcat(xv...).'
 
 using Plots
+
 plot(T,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
 yaxis!("Density n (cm^-3)")
+png("density.png")
 
 plot(T,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
 yaxis!("Integrated Emission (???)")
+png("integrated_emission.png")
 
 intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
 intensity=hcat(intensity...).'
 # calculates intensity reusing the same functional toolkit
 plot(T,intensity[:,1])
 yaxis!("Emission Intensity")
+png("emission.png")
+
