@@ -18,8 +18,6 @@ function loadB(filename)
 
     # Standard two column data form
     df=readdlm(filename)
-    #df = readdlm("B.cgs.kT-.0259.nh3ch3")
-    #df=readdlm("jagged.dat") # Only 8 points, very sawtoothy
     
     pts=df[:,1] # Points
     vals=df[:,2] #Values at these points
@@ -34,6 +32,7 @@ function loadB(filename)
     return af,df
 end
 
+#B,df=loadB("jagged.dat") # Only 8 points, very sawtoothy
 B,df=loadB("B.cgs.kT-.0259.nh3ch3")
 # Pooya's data runs from densities between 0 .. 0.08
 # Unit is in electrons / unit cell, so multiply by ~4.03e21 to get cm^-3
@@ -60,12 +59,13 @@ graphB(B,df)
 #Herz values from DOI: 10.1021/acs.accounts.5b00411
 A=5e6
 Bconst=0.9e-10
+# B is our Approxfun fit; internally it's a polynomial, but you can differentiate etc.
 
 using ODE
 function I(t, n)
-  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B
-#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]
-#  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ]
+  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
+#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
+#  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
 end
 
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
