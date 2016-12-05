@@ -13,6 +13,7 @@ function vandermonde(S,n,x::AbstractVector)
     V
 end
 
+# Original load function, for 1D B(n) data; i.e. such as ("B.cgs.kT-.0259.nh3ch3")
 function loadB(filename)
     c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
 
@@ -33,8 +34,31 @@ function loadB(filename)
     return af,df
 end
 
+# Original load function, for 1D B(n) data; i.e. such as ("B.cgs.kT-.0259.nh3ch3")
+function loadRnp(filename)
+    c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
+
+    # Standard two column data form
+    df=readdlm(filename)
+    
+    n=df[:,1] # N (or possibly P)
+    p=df[:,2] # P (or possibly N)
+    R=df[:,3] # Rates
+
+    # For ...(this)... case, make sure `length(pts) >> n`.
+    N=13 # This is a magic number, found to give a good fit to Pooya's data
+    println("Attempting Vandermonde / Chebyshev fit with: Range: ",c," Points in fit: ",N," Data points:",length(n))
+    V=vandermonde(c,N,n)
+    # Are you ready for the magic?
+    af=Fun(V\R,c) # Approximate Function (af)
+    # me is now an ApproxFun representation of the tabulated data. 
+    # As a Chebyshev polynomial fit we can do all sorts of differentiation + integration.
+    return af,df
+end
+
+
 #B,df=loadB("jagged.dat") # Only 8 points, very sawtoothy
-B,df=loadB("B.cgs.kT-.0259.nh3ch3")
+B,df=loadRnp("Rrate.kT-0.0259.IB-CB.mapi")
 # Pooya's data runs from densities between 0 .. 0.08
 # Unit is in electrons / unit cell, so multiply by ~4.03e21 to get cm^-3
 
