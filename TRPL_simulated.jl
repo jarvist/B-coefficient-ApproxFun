@@ -96,13 +96,6 @@ intensity=[-I(t,x) for x in xv[:,1]] #extract intensity as a function of time, b
 # Nb: probably not the most elegant way to do this (!)
 intensity=hcat(intensity...).'
 
-#function Irad(t,n) # just rad component
-#   [ B(n[1]/4.03e21) * n[1]*n[1]; n[1]]
-#end
-#
-#rintensity=[Irad(t,x) for x in xv[:,1]] 
-#rintensity=hcat(intensity...).'
-
 # calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
 plot(t,intensity[:,1])
 #plot!(t,rintensity[:,1])
