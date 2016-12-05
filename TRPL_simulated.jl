@@ -71,27 +71,29 @@ end
 
 # Initial vector; density is first part
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
-T,xv=ode23(I,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+t,xv=ode23(I,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
 xv=hcat(xv...).'
 
 using Plots
 
-plot(T,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
+plot(t,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
 yaxis!("Density n (cm^-3)")
 xaxis!("Time (s)")
 png("density_linear.png")
 yaxis!(:log10)
 png("density_log.png")
 
-plot(T,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
+plot(t,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
 yaxis!("Integrated Emission (???)")
 xaxis!("Time (s)")
 png("integrated_emission.png")
 
-intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
+intensity=[-I(t,x) for x in xv[:,1]] #extract intensity as a function of time
+# Nb: probably not the most elegant way to do this (!)
+
 intensity=hcat(intensity...).'
 # calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
-plot(T,intensity[:,1])
+plot(t,intensity[:,1])
 yaxis!("Emission Intensity")
 xaxis!("Time (s)")
 png("emission.png")
