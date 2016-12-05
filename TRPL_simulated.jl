@@ -66,41 +66,55 @@ Bconst=0.9e-10
 
 # We are now going to build our Ordinary Differential Equation model for n(t)
 using ODE
-function I(t, n) # Intensity as function of time and density
-#  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
-#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
-  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
-#  [-A*n[1]; n[1] ] # SRH 'A' term only 
+
+type Model
+    label
+    ODE::Function
+end
+
+Models = [
+    Model("Bcoeff",   (t,n) -> [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]), # Pure bimolecular; Pooya B(n)
+    Model("Bcoeff-A", (t,n) -> [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]), # SRH 'A' term from above; Pooya B(n)
+    Model("Bconst-A", (t,n) -> [-A*n[1] - Bconst * n[1]*n[1]; n[1]]), # SRH 'A' term and bimolecular fit from above
+    Model("SRH-A",    (t,n) -> [-A*n[1]; n[1] ]) # SRH 'A' term only
+]
+
+using Plots
+
+function plotsoln(t,xv)
+	plot(t,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
+	yaxis!("Density n (cm^-3)")
+	xaxis!("Time (s)")
+	png("density_linear.png")
+	yaxis!(:log10)
+	png("density_log.png")
+
+	plot(t,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
+	yaxis!("Integrated Emission (???)")
+	xaxis!("Time (s)")
+	png("integrated_emission.png")
+
+    I(n) = -B(n/4.03e21) * n*n
+	intensity=[-I(x) for x in xv[:,1]] #extract intensity as a function of time, by feeding the solved densities (from the ODE) into the solver
+	# Nb: probably not the most elegant way to do this (!)
+	intensity=hcat(intensity...).'
+
+	# calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
+	plot(t,intensity[:,1])
+	yaxis!("Emission Intensity")
+	xaxis!("Time (s)")
+	png("emission.png")
+	yaxis!(:log10)
+	png("emission_log.png")
 end
 
 # Initial vector; density is first part
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
-t,xv=ode23(I,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
-xv=hcat(xv...).'
 
-using Plots
+for model in Models
+	println("Simulating model: ",model.label)
+    t,xv=ode23(model.ODE,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+	xv=hcat(xv...).'
+    plotsoln(t,xv)
+end
 
-plot(t,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
-yaxis!("Density n (cm^-3)")
-xaxis!("Time (s)")
-png("density_linear.png")
-yaxis!(:log10)
-png("density_log.png")
-
-plot(t,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
-yaxis!("Integrated Emission (???)")
-xaxis!("Time (s)")
-png("integrated_emission.png")
-
-intensity=[-I(t,x) for x in xv[:,1]] #extract intensity as a function of time, by feeding the solved densities (from the ODE) into the solver
-# Nb: probably not the most elegant way to do this (!)
-intensity=hcat(intensity...).'
-
-# calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
-plot(t,intensity[:,1])
-#plot!(t,rintensity[:,1])
-yaxis!("Emission Intensity")
-xaxis!("Time (s)")
-png("emission.png")
-yaxis!(:log10)
-png("emission_log.png")
