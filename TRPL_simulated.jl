@@ -52,6 +52,9 @@ function graphB(af,df)
 end
 
 using Plots
+default(show=true)
+default(size=(1024,768)) # of rendered PNGs
+
 graphB(B,df)
 
 # OK; we have an ApproxFun function (B) fitted to the tabulated data
@@ -65,8 +68,9 @@ Bconst=0.9e-10
 using ODE
 function I(t, n) # Intensity as function of time and density
 #  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
-  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
-#  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
+#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
+  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
+#  [-A*n[1]; n[1] ] # SRH 'A' term only 
 end
 
 # Initial vector; density is first part
@@ -88,12 +92,20 @@ yaxis!("Integrated Emission (???)")
 xaxis!("Time (s)")
 png("integrated_emission.png")
 
-intensity=[-I(t,x) for x in xv[:,1]] #extract intensity as a function of time
+intensity=[-I(t,x) for x in xv[:,1]] #extract intensity as a function of time, by feeding the solved densities (from the ODE) into the solver
 # Nb: probably not the most elegant way to do this (!)
-
 intensity=hcat(intensity...).'
+
+#function Irad(t,n) # just rad component
+#   [ B(n[1]/4.03e21) * n[1]*n[1]; n[1]]
+#end
+#
+#rintensity=[Irad(t,x) for x in xv[:,1]] 
+#rintensity=hcat(intensity...).'
+
 # calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
 plot(t,intensity[:,1])
+#plot!(t,rintensity[:,1])
 yaxis!("Emission Intensity")
 xaxis!("Time (s)")
 png("emission.png")
