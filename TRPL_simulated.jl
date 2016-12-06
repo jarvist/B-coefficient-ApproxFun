@@ -118,6 +118,17 @@ for model in Models
 	println("Simulating model: ",model.label)
     model.t,model.xv=ode23(model.ODE,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
 	model.xv=hcat(model.xv...).'
-    plotsoln(model.t,model.xv)
+    #plotsoln(model.t,model.xv)
 end
+
+plot()
+yaxis!("Density n (cm^-3)")
+xaxis!("Time (s)")
+for model in Models
+    plot!(model.t,model.xv[:,1],label=model.label)
+end
+png("density_linear.png")
+
+yaxis!(:log10)
+png("density_log.png")
 
