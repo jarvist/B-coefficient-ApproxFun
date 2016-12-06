@@ -69,27 +69,30 @@ using ODE
 
 type Model
     label
-    ODE::Function
+    ODE::Function # ODE of model
+    t # holds calculated data
+    xv
 end
 
 Models = [
-    Model("Bcoeff",   (t,n) -> [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]), # Pure bimolecular; Pooya B(n)
-    Model("Bcoeff-A", (t,n) -> [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]]), # SRH 'A' term from above; Pooya B(n)
-    Model("Bconst-A", (t,n) -> [-A*n[1] - Bconst * n[1]*n[1]; n[1]]), # SRH 'A' term and bimolecular fit from above
-    Model("SRH-A",    (t,n) -> [-A*n[1]; n[1] ]) # SRH 'A' term only
+    Model("Bcoeff",   (t,n) -> [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # Pure bimolecular; Pooya B(n)
+    Model("Bcoeff-A", (t,n) -> [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # SRH 'A' term from above; Pooya B(n)
+    Model("Bconst-A", (t,n) -> [-A*n[1] - Bconst * n[1]*n[1]; n[1]],[],[]), # SRH 'A' term and bimolecular fit from above
+    Model("SRH-A",    (t,n) -> [-A*n[1]; n[1] ], [], []) # SRH 'A' term only
 ]
 
 using Plots
 
 function plotsoln(t,xv)
-	plot(t,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
+	
+    plot(t,xv[:,1]) # Time on x-axis, versus n[1] (density) on Y axis
 	yaxis!("Density n (cm^-3)")
 	xaxis!("Time (s)")
 	png("density_linear.png")
 	yaxis!(:log10)
 	png("density_log.png")
 
-	plot(t,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
+    plot(t,xv[:,2]) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
 	yaxis!("Integrated Emission (???)")
 	xaxis!("Time (s)")
 	png("integrated_emission.png")
@@ -113,8 +116,8 @@ initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
 
 for model in Models
 	println("Simulating model: ",model.label)
-    t,xv=ode23(model.ODE,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
-	xv=hcat(xv...).'
-    plotsoln(t,xv)
+    model.t,model.xv=ode23(model.ODE,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+	model.xv=hcat(model.xv...).'
+    plotsoln(model.t,model.xv)
 end
 
