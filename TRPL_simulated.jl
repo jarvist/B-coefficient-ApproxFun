@@ -121,6 +121,7 @@ for model in Models
     #plotsoln(model.t,model.xv)
 end
 
+println("Plotting charge density vs. time")
 plot()
 yaxis!("Density n (cm^-3)")
 xaxis!("Time (s)")
@@ -131,4 +132,32 @@ png("density_linear.png")
 
 yaxis!(:log10)
 png("density_log.png")
+
+println("Plotting integrated emission.")
+plot()
+for model in Models
+    plot(model.t,model.xv[:,2],label=model.label) # Time on x-axis, versus n[2] (integrating dn/dt, emission) on Y axis
+end
+yaxis!("Integrated Emission (???)")
+xaxis!("Time (s)")
+png("integrated_emission.png")
+
+println("Simulating radiative emission (TRPL) and plotting...")
+plot()
+
+I(n) = -B(n/4.03e21) * n*n # Emission model
+for model in Models
+	intensity=[-I(x) for x in model.xv[:,1]] #extract intensity as a function of time, by feeding the solved densities (from the ODE) into the solver
+	# Nb: probably not the most elegant way to do this (!)
+	intensity=hcat(intensity...).'
+
+	# calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
+	plot!(model.t,intensity[:,1],label=model.label)
+end
+
+yaxis!("Emission Intensity")
+xaxis!("Time (s)")
+png("emission.png")
+yaxis!(:log10)
+png("emission_log.png")
 
