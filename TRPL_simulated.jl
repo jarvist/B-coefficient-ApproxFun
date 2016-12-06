@@ -59,9 +59,6 @@ graphB(B,df)
 
 # OK; we have an ApproxFun function (B) fitted to the tabulated data
 
-#Herz values from DOI: 10.1021/acs.accounts.5b00411
-A=5e6
-Bconst=0.9e-10
 # B is our Approxfun fit; internally it's a polynomial, but you can differentiate etc. as if it were analytic
 
 # We are now going to build our Ordinary Differential Equation model for n(t)
@@ -76,9 +73,15 @@ end
 
 Models = [
     Model("Bcoeff",   (t,n) -> [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # Pure bimolecular; Pooya B(n)
-    Model("Bcoeff-A", (t,n) -> [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # SRH 'A' term from above; Pooya B(n)
-    Model("Bconst-A", (t,n) -> [-A*n[1] - Bconst * n[1]*n[1]; n[1]],[],[]), # SRH 'A' term and bimolecular fit from above
-    Model("SRH-A",    (t,n) -> [-A*n[1]; n[1] ], [], []) # SRH 'A' term only
+    Model("Bcoeff-A", (t,n) -> [-5e6*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # SRH 'A' term from Herz; Pooya B(n)
+    # DOI: 10.1021/acsenergylett.6b00236
+    Model("dQ-treatedfilm-A-B-C",   (t,n) -> [-3.8e4*n[1] - 4.0e-11*n[1]*n[1] - 4e-28*n[1]*n[1]*n[1] ; n[1]],[],[]),
+
+    #Herz values from DOI: 10.1021/acs.accounts.5b00411
+    #AH=5e6
+    #BH=0.9e-10
+    Model("Herz-A-B", (t,n) -> [-5e6*n[1] - 0.9e-10 * n[1]*n[1]; n[1]],[],[]), # SRH 'A' term and bimolecular fit from above
+    Model("Herz-A",    (t,n) -> [-5e6*n[1]; n[1] ], [], []) # SRH 'A' term only
 ]
 
 using Plots
