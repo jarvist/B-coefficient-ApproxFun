@@ -8,14 +8,14 @@ using ApproxFun
 function vandermonde(S,n,x::AbstractVector)
     V=Array(Float64,length(x),n)
     for k=1:n
-        V[:,k]=Fun([zeros(k-1);1],S)(x)
+        V[:,k]=Fun(S,[zeros(k-1);1])(x)
     end
     V
 end
 
 # Original load function, for 1D B(n) data; i.e. such as ("B.cgs.kT-.0259.nh3ch3")
 function loadB(filename)
-    c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
+    c=Chebyshev(Interval(0,0.08)) #Define Chebyshev domain in this range (to match data imported)
 
     # Standard two column data form
     df=readdlm(filename)
@@ -28,7 +28,7 @@ function loadB(filename)
     println("Attempting Vandermonde / Chebyshev fit with: Range: ",c," Points in fit: ",n," Data points:",length(pts))
     V=vandermonde(c,n,pts)
     # Are you ready for the magic?
-    af=Fun(V\vals,c) # Approximate Function (af)
+    af=Fun(c,V\vals) # Approximate Function (af)
     # me is now an ApproxFun representation of the tabulated data. 
     # As a Chebyshev polynomial fit we can do all sorts of differentiation + integration.
     return af,df
@@ -36,7 +36,7 @@ end
 
 # Original load function, for 1D B(n) data; i.e. such as ("B.cgs.kT-.0259.nh3ch3")
 function loadRnp(filename)
-    c=Chebyshev([0,0.08]) #Define Chebyshev domain in this range (to match data imported)
+    c=Chebyshev(Interval(0,0.08)) #Define Chebyshev domain in this range (to match data imported)
 
     # Standard two column data form
     df=readdlm(filename)
@@ -50,7 +50,7 @@ function loadRnp(filename)
     println("Attempting Vandermonde / Chebyshev fit with: Range: ",c," Points in fit: ",N," Data points:",length(n))
     V=vandermonde(c,N,n)
     # Are you ready for the magic?
-    af=Fun(V\R,c) # Approximate Function (af)
+    af=Fun(c,V\R) # Approximate Function (af)
     # me is now an ApproxFun representation of the tabulated data. 
     # As a Chebyshev polynomial fit we can do all sorts of differentiation + integration.
     return af,df
