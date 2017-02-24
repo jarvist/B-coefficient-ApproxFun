@@ -8,8 +8,8 @@ using ApproxFun
 function vandermonde(S,n,x::AbstractVector)
     V=Array(Float64,length(x),n)
     for k=1:n
-        @printf("K-coeff: %d of %d\n",k,n)
-        println(x)
+#        @printf("K-coeff: %d of %d\n",k,n)
+#        println(x)
         V[:,k]=Fun(S,[zeros(k-1);1])(x)
     end
     V
@@ -54,6 +54,7 @@ function graphB(af,df)
 end
 
 using Plots
+gr() # GR high-efficiency graphing
 default(show=true)
 default(size=(1024,768)) # of rendered PNGs
 
