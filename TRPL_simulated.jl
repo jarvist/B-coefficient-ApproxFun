@@ -6,11 +6,12 @@ using ApproxFun
 # From: https://github.com/ApproxFun/ApproxFun.jl/issues/275 , courtesy of private communication with Sheehan Olver
 # Least squares approximation of data on an evenly spaced grid with Chebyshev series
 function vandermonde(S,n,x::AbstractVector)
-    V=Array(Float64,length(x),n)
+    V=Array{Float64}(length(x),n)
     for k=1:n
-#        @printf("K-coeff: %d of %d\n",k,n)
-#        println(x)
-        V[:,k]=Fun(S,[zeros(k-1);1])(x)
+        #@printf("K-coeff: %d of %d\n",k,n)
+        #println("Interval: ",[zeros(k-1);1.0] )
+        #println(x)
+        V[:,k]=Fun(S,[zeros(k-1);1.0]).(x)
     end
     V
 end
@@ -23,6 +24,9 @@ function loadB(filename)
     
     pts=df[:,1] # Points
     vals=df[:,2] #Values at these points
+
+    println("pts as read in:")
+    show(pts)
 
     # For ...(this)... case, make sure `length(pts) >> n`.
     n=13 # This is a magic number, found to give a good fit to Pooya's data

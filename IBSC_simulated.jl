@@ -6,9 +6,9 @@ using ApproxFun
 # From: https://github.com/ApproxFun/ApproxFun.jl/issues/275 , courtesy of private communication with Sheehan Olver
 # Least squares approximation of data on an evenly spaced grid with Chebyshev series
 function vandermonde(S,n,x::AbstractVector)
-    V=Array(Float64,length(x),n)
+    V=Array{Float64}(length(x),n)
     for k=1:n
-        V[:,k]=Fun(S,[zeros(k-1);1])(x)
+        V[:,k]=Fun(S,[zeros(k-1);1]).(x)
     end
     V
 end
@@ -87,7 +87,7 @@ Bconst=0.9e-10
 
 # We are now going to build our Ordinary Differential Equation model for n(t)
 using ODE
-function I(t, n) # Intensity as function of time and density
+function Intensity(t, n) # Intensity as function of time and density
 #  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
   [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
 #  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
@@ -95,7 +95,7 @@ end
 
 # Initial vector; density is first part
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
-T,xv=ode23(I,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+T,xv=ode23(Intensity,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
 xv=hcat(xv...).'
 
 using Plots
@@ -112,7 +112,7 @@ yaxis!("Integrated Emission (???)")
 xaxis!("Time (s)")
 png("integrated_emission.png")
 
-intensity=[-I(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
+intensity=[-Intensity(T,x) for x in xv[:,1]] #probably not the most elegant way to do this
 intensity=hcat(intensity...).'
 # calculates intensity reusing the same functional toolkit - NB: assumes all recombination is emissive
 plot(T,intensity[:,1])
