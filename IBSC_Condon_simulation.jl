@@ -75,8 +75,8 @@ function graphB(af,df)
     png("Bcoeff_log.png")
 end
 
-using Plots
-graphB(B,df)
+#using Plots
+#graphB(B,df)
 
 # OK; we have an ApproxFun function (B) fitted to the tabulated data
 
@@ -86,16 +86,21 @@ Bconst=0.9e-10
 # B is our Approxfun fit; internally it's a polynomial, but you can differentiate etc. as if it were analytic
 
 # We are now going to build our Ordinary Differential Equation model for n(t)
-using ODE
+using OrdinaryDiffEq, DiffEqBase
+#using ODE
 function Intensity(t, n) # Intensity as function of time and density
-#  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
-  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
+  [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # Pure bimolecular; Pooya B(n)
+#  [-A*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]] # SRH 'A' term from above; Pooya B(n)
 #  [-A*n[1] - Bconst * n[1]*n[1]; n[1] ] # SRH 'A' term and bimolecular fit from above
 end
 
 # Initial vector; density is first part
 initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
-T,xv=ode23(Intensity,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+#T,xv=ode23(Intensity,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+
+prob=ODEProblem(Intensity,initial,[0.;2e-8])
+T,xv=solve(prob)
+
 xv=hcat(xv...).'
 
 using Plots
