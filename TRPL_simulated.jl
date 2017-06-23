@@ -80,35 +80,36 @@ end
 
 Models = [
     Model("Bcoeff",   (t,n) -> [ - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # Pure bimolecular; Pooya B(n)
-    Model("Bcoeff-A", (t,n) -> [-5e6*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # SRH 'A' term from Herz; Pooya B(n)
+#    Model("Bcoeff-A", (t,n) -> [-5e6*n[1] - B(n[1]/4.03e21) * n[1]*n[1] ; n[1]],[],[]), # SRH 'A' term from Herz; Pooya B(n)
     # DOI: 10.1021/acsenergylett.6b00236
-    Model("dQ-treatedfilm-A-B-C",   (t,n) -> [-3.8e4*n[1] - 4.0e-11*n[1]*n[1] - 4e-28*n[1]*n[1]*n[1] ; n[1]],[],[]),
+#    Model("dQ-treatedfilm-A-B-C",   (t,n) -> [-3.8e4*n[1] - 4.0e-11*n[1]*n[1] - 4e-28*n[1]*n[1]*n[1] ; n[1]],[],[]),
 
     #Herz values from DOI: 10.1021/acs.accounts.5b00411
     #AH=5e6
     #BH=0.9e-10
-    Model("Herz-A-B", (t,n) -> [-5e6*n[1] - 0.9e-10 * n[1]*n[1]; n[1]],[],[]), # SRH 'A' term and bimolecular fit from above
-    Model("Herz-A",    (t,n) -> [-5e6*n[1]; n[1] ], [], []) # SRH 'A' term only
+#    Model("Herz-A-B", (t,n) -> [-5e6*n[1] - 0.9e-10 * n[1]*n[1]; n[1]],[],[]), # SRH 'A' term and bimolecular fit from above
+#    Model("Herz-A",    (t,n) -> [-5e6*n[1]; n[1] ], [], []) # SRH 'A' term only
 ]
 
 using Plots
 
 # Initial vector; density is first part
-initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
+#initial=[0.08*4.03e21, 0.] # Start at n=0.08 Pooyas
+initial=[1e19, 0.] # sensible laser fluence
 
 for model in Models
 	println("Simulating model: ",model.label)
-    model.t,model.xv=ode23(model.ODE,initial,[0.;2e-8]) # Numerically Integrate from 0 to ... seconds
+    model.t,model.xv=ode23(model.ODE,initial,[0.0;900e-9]) # Numerically Integrate from 0 to ... seconds
 	model.xv=hcat(model.xv...).'
     #plotsoln(model.t,model.xv)
 end
 
 println("Plotting charge density vs. time")
 plot()
-yaxis!("Density n (cm^-3)")
-xaxis!("Time (s)")
+yaxis!("Density n (1e18 cm-3)")
+xaxis!("Time (ns)")
 for model in Models
-    plot!(model.t,model.xv[:,1],label=model.label)
+    plot!(model.t.*1e9,model.xv[:,1].*1e-18,label=model.label,ylims=(0.1,Inf)) 
 end
 png("density_linear.png")
 
